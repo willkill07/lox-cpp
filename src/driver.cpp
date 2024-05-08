@@ -1,9 +1,10 @@
+#include <cstdlib>
 #include <iostream>
 #include <span>
 #include <string_view>
 
+#include <CLI/CLI.hpp>
 #include <fmt/core.h>
-#include <tl/optional.hpp>
 
 #include "input_stream_context.hpp"
 
@@ -15,9 +16,7 @@ void echo(std::istream &is) {
   }
 }
 
-void run(std::span<std::string_view const> program_args) {
-  [[maybe_unused]] std::string_view program = program_args.front();
-  auto args = program_args.subspan(1);
+void run(std::span<std::string const> args) {
   if (args.empty()) {
     echo(std::cin);
   } else {
@@ -30,8 +29,10 @@ void run(std::span<std::string_view const> program_args) {
 }
 
 int main(int argc, char **argv) {
-  std::vector<std::string_view> args;
-  args.reserve(argc);
-  std::copy_n(argv, argc, std::back_inserter(args));
-  run(args);
+  std::vector<std::string> files;
+  CLI::App app{"A Lox Language Interpreter", "Lox"};
+  app.add_option("files", files, "files to load into the interpreter");
+  CLI11_PARSE(app, argc, argv);
+  run(files);
+  return EXIT_SUCCESS;
 }
